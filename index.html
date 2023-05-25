@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trading Bot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .logger {
+      background-color: #f2f2f2;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ccxt/1.57.6/ccxt.js"></script>
+  <script src="public.js"></script>
+  <script src="private.js"></script>
+  <script src="execute_Trade.js"></script>
+  <script src="logging_component.js"></script>
+  <script src="main.js"></script>
+</head>
+<body>
+  <h1>Trading Bot</h1>
+
+  <div class="logger">
+    <h2>Logger</h2>
+    <pre id="logOutput"></pre>
+  </div>
+
+  <button class="button" id="startBtn">Start</button>
+  <button class="button" id="stopBtn">Stop</button>
+
+  <h2>FLOKI Price Data</h2>
+  <table id="priceTable">
+    <tr>
+      <th>Timestamp</th>
+      <th>Symbol</th>
+      <th>Open</th>
+      <th>High</th>
+      <th>Low</th>
+      <th>Close</th>
+      <th>Volume</th>
+    </tr>
+  </table>
+
+  <h2>Trades</h2>
+  <table id="tradeTable">
+    <tr>
+      <th>Timestamp</th>
+      <th>Symbol</th>
+      <th>Type</th>
+      <th>Price</th>
+      <th>Amount</th>
+      <th>Total</th>
+    </tr>
+  </table>
+
+  <script>
+    var logOutput = document.getElementById('logOutput');
+    var startBtn = document.getElementById('startBtn');
+    var stopBtn = document.getElementById('stopBtn');
+    var priceTable = document.getElementById('priceTable');
+    var tradeTable = document.getElementById('tradeTable');
+
+    var logger = {
+      log: function (message) {
+        var timestamp = new Date().toISOString();
+        var logMessage = '[' + timestamp + '] ' + message + '\n';
+        logOutput.textContent += logMessage;
+      },
+      error: function (message) {
+        var timestamp = new Date().toISOString();
+        var logMessage = '[' + timestamp + '] ERROR: ' + message + '\n';
+        logOutput.textContent += logMessage;
+      },
+      clear: function () {
+        logOutput.textContent = '';
+        clearTable(priceTable);
+        clearTable(tradeTable);
+      }
+    };
+
+    function clearTable(table) {
+      var rowCount = table.rows.length;
+      for (var i = rowCount - 1; i > 0; i--) {
+        table.deleteRow(i);
+      }
+    }
+
+    function displayPriceData(data) {
+      var row = priceTable.insertRow(-1);
+      row.insertCell().textContent = data.timestamp;
+      row.insertCell().textContent = data.symbol;
+      row.insertCell().textContent = data.open;
+      row.insertCell().textContent = data.high;
+      row.insertCell().textContent = data.low;
+      row.insertCell().textContent = data.close;
+      row.insertCell().textContent = data.volume;
+    }
+
+    function displayTrade(trade) {
+      var row = tradeTable.insertRow(-1);
+      row.insertCell().textContent = trade.timestamp;
+      row.insertCell().textContent = trade.symbol;
+      row.insertCell().textContent = trade.type;
+      row.insertCell().textContent = trade.price;
+      row.insertCell().textContent = trade.amount;
+      row.insertCell().textContent = trade.total;
+    }
+
+    var tradingBot;
+
+    function startBot() {
+      logger.clear();
+      logger.log('Trading bot started.');
+
+      // Run the trading bot
+      tradingBot = setInterval(main, 60000);
+    }
+
+    function stopBot() {
+      logger.log('Trading bot stopped.');
+      clearInterval(tradingBot);
+    }
+
+    startBtn.addEventListener('click', startBot);
+    stopBtn.addEventListener('click', stopBot);
+
+    // Example usage of displaying price data and trades
+    displayPriceData({
+      timestamp: '2023-05-25 10:00:00',
+      symbol: 'FLOKI/USD',
+      open: '0.005',
+      high: '0.008',
+      low: '0.004',
+      close: '0.007',
+      volume: '1000'
+    });
+
+    displayTrade({
+      timestamp: '2023-05-25 10:05:00',
+      symbol: 'FLOKI/USD',
+      type: 'Buy',
+      price: '0.007',
+      amount: '200',
+      total: '1.4'
+    });
+
+    displayTrade({
+      timestamp: '2023-05-25 10:10:00',
+      symbol: 'FLOKI/USD',
+      type: 'Sell',
+      price: '0.006',
+      amount: '150',
+      total: '0.9'
+    });
+  </script>
+</body>
+</html>
